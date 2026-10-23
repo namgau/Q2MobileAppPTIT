@@ -24,14 +24,17 @@ import com.example.fruitshop.R;
 import com.example.fruitshop.dal.DBHelper;
 import com.example.fruitshop.models.Account;
 import com.example.fruitshop.models.Fruit;
+import com.example.fruitshop.models.Order;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 // Admin: thêm / sửa / xóa / tìm kiếm / xem trái cây.
-// Khách hàng: chỉ xem, tìm kiếm và kiểm tra hạn sử dụng; phần đặt hàng được tích hợp riêng.
+// Khách hàng: xem trái cây còn hàng, tìm kiếm, kiểm tra hạn sử dụng, đặt hàng (chặn trái cây hết hạn)
 public class FruitActivity extends AppCompatActivity {
 
     private TextView tvTitle;
@@ -41,6 +44,7 @@ public class FruitActivity extends AppCompatActivity {
 
     private DBHelper dbHelper;
     private boolean isAdmin;
+    private int customerId;
 
     private final List<Fruit> fruits = new ArrayList<>();
     private ArrayAdapter<Fruit> adapter;
@@ -59,6 +63,7 @@ public class FruitActivity extends AppCompatActivity {
 
         // Đọc tài khoản đang đăng nhập từ SharedPreferences
         SharedPreferences prefs = getSharedPreferences(LoginActivity.PREF_NAME, MODE_PRIVATE);
+        int accountId = prefs.getInt(LoginActivity.KEY_ACCOUNT_ID, -1);
         isAdmin = Account.ROLE_ADMIN.equals(prefs.getString(LoginActivity.KEY_ROLE, ""));
 
         if (isAdmin) {
@@ -67,8 +72,10 @@ public class FruitActivity extends AppCompatActivity {
             btnAdd.setOnClickListener(v -> showFruitDialog(null));
             lvFruits.setOnItemClickListener((p, view, pos, id) -> showFruitDialog(fruits.get(pos)));
         } else {
+            customerId = dbHelper.getCustomerByAccountId(accountId).getId();
             tvTitle.setText("Trái cây đang bán");
             btnAdd.setVisibility(View.GONE);   // khách hàng không được thêm/sửa/xóa
+            lvFruits.setOnItemClickListener((p, view, pos, id) -> showOrderDialog(fruits.get(pos)));
         }
 
         adapter = new ArrayAdapter<Fruit>(this, R.layout.item_fruit, fruits) {
@@ -199,6 +206,67 @@ public class FruitActivity extends AppCompatActivity {
             }
             dialog.dismiss();
             loadFruits();
+        });
+    }
+
+    // ===================== KHÁCH HÀNG: ĐẶT HÀNG =====================
+
+    private void showOrderDialog(Fruit fruit) {
+        if (fruit.isExpired()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Không thể đặt hàng")
+                    .setMessage(fruit.getName() + " đã hết hạn sử dụng ("
+                            + formatDate(fruit.getExpiryDate()) + ").")
+                    .setPositiveButton("Đóng", null)
+                    .show();
+            return;
+        }
+
+        View form = LayoutInflater.from(this).inflate(R.layout.dialog_order, null);
+        TextView tvInfo = form.findViewById(R.id.tvInfo);
+        EditText edtQuantity = form.findViewById(R.id.edtQuantity);
+
+        tvInfo.setText(fruit.getDescription()
+                + "\nGiá: " + formatMoney(fruit.getPrice())
+                + "\nCòn lại: " + fruit.getQuantity()
+                + "\nHSD: " + formatDate(fruit.getExpiryDate()));
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Đặt " + fruit.getName())
+                .setView(form)
+                .setPositiveButton("Đặt hàng", null)
+                .setNegativeButton("Hủy", null)
+                .show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String text = edtQuantity.getText().toString().trim();
+            int quantity;
+            try {
+                quantity = Integer.parseInt(text);
+            } catch (NumberFormatException e) {
+                edtQuantity.setError("Nhập số lượng hợp lệ");
+                return;
+            }
+
+            if (quantity <= 0) {
+                edtQuantity.setError("Số lượng phải lớn hơn 0");
+                return;
+            }
+            if (quantity > fruit.getQuantity()) {
+                edtQuantity.setError("Chỉ còn " + fruit.getQuantity());
+                return;
+            }
+
+            String now = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(new Date());
+            Order order = new Order(0, customerId, now,
+                    quantity * fruit.getPrice(), Order.STATUS_PENDING);
+            if (dbHelper.placeOrder(order, fruit, quantity)) {
+                Toast.makeText(this, "Đặt hàng thành công", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+                loadFruits();
+            } else {
+                Toast.makeText(this, "Đặt hàng thất bại", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
