@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Form thêm / sửa trái cây (Admin) -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="8dp">
+
+        <EditText
+            android:id="@+id/edtName"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_edittext"
+            android:hint="Tên trái cây"
+            android:inputType="text"
+            android:paddingHorizontal="12dp" />
+
+        <EditText
+            android:id="@+id/edtCategory"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_edittext"
+            android:hint="Loại (VD: Nhập khẩu, Trong nước)"
+            android:inputType="text"
+            android:paddingHorizontal="12dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/edtPrice"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_edittext"
+                android:hint="Giá (đ)"
+                android:inputType="number"
+                android:maxLength="9"
+                android:paddingHorizontal="12dp" />
+
+            <EditText
+                android:id="@+id/edtQuantity"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_edittext"
+                android:hint="Số lượng"
+                android:inputType="number"
+                android:maxLength="6"
+                android:paddingHorizontal="12dp" />
+        </LinearLayout>
+
+        <!-- Không cho gõ tay, bấm vào sẽ mở lịch chọn ngày -->
+        <EditText
+            android:id="@+id/edtExpiry"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_edittext"
+            android:focusable="false"
+            android:hint="Hạn sử dụng (bấm để chọn ngày)"
+            android:paddingHorizontal="12dp" />
+
+        <EditText
+            android:id="@+id/edtDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_edittext"
+            android:gravity="top"
+            android:hint="Mô tả"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:padding="12dp" />
+    </LinearLayout>
+</ScrollView>
