@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#2E7D32</color>
+    <color name="primary_dark">#1B5E20</color>
+    <color name="expired">#D32F2F</color>
+    <color name="status_pending">#EF6C00</color>
+    <color name="status_confirmed">#1565C0</color>
+    <color name="gray_button">#757575</color>
+    <color name="border_gray">#DDDDDD</color>
+    <color name="text_dark">#222222</color>
+    <color name="text_gray">#666666</color>
+    <color name="bg_light">#F5F7F5</color>
+    <color name="white">#FFFFFF</color>
+</resources>
